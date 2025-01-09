@@ -1,0 +1,145 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Section Styles */
+section {
+    padding: 50px 20px;
+    background: #f9f9f9;
+    text-align: center;
+}
+
+section h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: #314b79;
+}
+
+section h3 {
+    font-size: 1.5em;
+    margin-top: 20px;
+    color: #314b79;
+}
+
+/* Hero Section */
+.hero {
+    background: #314b79;
+    color: #fff;
+    text-align: center;
+    padding: 50px 20px;
+}
+
+.hero h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.highlighted-project h2 {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+.featured-image {
+    width: 100%;
+    max-width: 600px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.hero .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #ffffff;
+    color: #314b79;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.hero .btn:hover {
+    background: #ddd;
+}
+
+/* Video Grid */
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.video-item {
+    text-align: center;
+}
+
+.video-item video {
+    width: 100%;
+    border-radius: 5px;
+}
+
+.video-item h3 {
+    margin-top: 10px;
+    font-size: 1.2em;
+    color: #555;
+}
+
+/* Code Boxes */
+.code-box {
+    max-height: 400px;
+    overflow-y: auto;
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-family: 'Courier New', monospace;
+    font-size: 1.2em;
+    line-height: 1.5;
+}
+
+/* Testing Section */
+.testing ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.testing li {
+    font-size: 1.2em;
+    margin: 10px 0;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #333;
+    color: #fff;
+}
+
+/* Limit the size of single videos */
+.music-programming .video-grid video {
+    max-width: 600px; /* Match the size of videos in the grid */
+    max-height: 375px; /* Maintain aspect ratio */
+    width: 100%; /* Ensure responsiveness */
+    height: auto; /* Maintain aspect ratio */
+    margin: 0 auto; /* Center the video */
+    display: block; /* Ensure it aligns properly */
+}
+
+.video-grid iframe {
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9; /* Maintains a 16:9 aspect ratio */
+    border: none; /* Removes border */
+    display: block; /* Centers the iframe */
+    margin: 0 auto; /* Centers horizontally */
+}

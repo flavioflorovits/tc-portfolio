@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio</title>
+    <link href="style.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Hero Section (Featured Project) -->
+    <header class="hero">
+        <div class="container">
+            <h1>Flavio's Portfolio</h1>
+            <div class="highlighted-project">
+                <h2>Stellar Stables</h2>
+                <img src="project1.jpg" alt="Featured Project Image" class="featured-image">
+                <p>Stellar Stables is a 2D point-and-click game, set in a bright, quirky world. Players explore various areas to collect various horses by solving puzzles and playing minigames.
+                    The game made by six game development students during the course of 3.5 months. My primary roles in the team were to do programming and QA for the project.
+                    What I did and what I learned can be found below.
+                </p>
+                <a href="#programming" class="btn">Gameplay Programming</a>
+                <a href="#testing" class="btn">QA</a>
+            </div>
+        </div>
+    </header>
+
+    <section id="programming" class="programming">
+        <div class="container">
+            <h2>Gameplay Programming</h2>
+            <p>On the programming side of things, I helped build some core functionalities of the game, including the programming of the minigames that you get to play,
+                as well as a unique food inventory system, built for adaptability and scalability using a Dictionary. This allowed me to gain skills in, among others: <br><br> Scriptable Objects
+                <br> Events <br> Singletons <br> Polymorphism <br> Dictionaries <br> using Lambda Expressions <br> Modular Programming <br> and OOP in general. <br> <br> Some code snippets of these can be found below. 
+            </p>
+
+        </div>
+    </section>
+
+    <!-- Programming Section (Fish Minigame) -->
+    <section id="fish-programming" class="fish-programming">
+        <div class="container">
+            <h2>Programming: Fishing Minigame</h2>
+            <p>Minigames are a core part of the game, which need to be completed at their given levels to obtain horses, or rarer skins for horses. There
+                are currently 2 minigames in the game, the Fishing minigame being one of them. The core idea is to catch the horse that lurks in the waters, while
+                the fish you catch while playing can be used to feed the horse. There are also multiple levels of the game, which increases difficulty and reduces
+                spawn chance for the rarer horses. These levels introduce obstacles and quicker, harder to catch fish and horses. How was this achieved? See below!
+            </p>
+            <div class="video-grid">
+                <div class="video-item">
+                    <iframe 
+                        width="600" 
+                        height="375" 
+                        src="https://www.youtube.com/embed/a4QR1lPYr9A" 
+                        title="Level 1 Video" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                    <h3>Level 1</h3>
+                </div>
+            
+                <div class="video-item">
+                    <iframe 
+                       width="600" 
+                        height="375" 
+                        src="https://www.youtube.com/embed/L7ITvClBRaY" 
+                        title="Level 2 Video" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                    <h3>Level 2</h3>
+                </div>
+            </div>
+            
+            
+            <h3>Fish Movement Code</h3>
+            <p>The fish movement below handles the movement of the fish, as well as give them a bit of a bobbing effect to feel less "on rails." 
+                It checks which side of the screen the fish was spawned, and then sets the other side as the target. It also randomizes the sorting order 
+                to have fish swimming infront of/behind certain world pieces to give the scene more life.
+            </p>
+            <div class="code-box">
+                <pre><code class="language-csharp">
+                // Fish movement code
+                using System.Collections;
+                using System.Collections.Generic;
+                using System.Runtime.CompilerServices;
+                using UnityEngine;
+                using UnityEngine.InputSystem.LowLevel;
+                using UnityEngine.UIElements;
+                
+                public class FishMovementHandler : MonoBehaviour
+                {
+                
+                    [SerializeField] private SpriteRenderer spriteRenderer;
+                    [SerializeField] protected float fishSpeed;
+                    private float targetXValue;
+                    private bool isMoving = false;
+                    private bool isMovingRight = false;
+                
+                    protected float bobbingAmplitude;
+                    protected float bobbingFrequency;
+                    protected float originalYPosition;
+                    protected float bobbingOffset;
+                
+                    // Start is called before the first frame update
+                    void Start()
+                    {
+                
+                    }
+                
+                    // Update is called once per frame
+                    void Update()
+                    {
+                        if (isMoving)
+                        {
+                            if (isMovingRight)
+                            {
+                                if (transform.position.x < targetXValue)
+                                {
+                                    transform.position += new Vector3(fishSpeed * Time.deltaTime, 0, 0);
+                                }
+                                else
+                                {
+                                    Despawn();
+                                }
+                            }
+                            else
+                            {
+                                if (transform.position.x > targetXValue)
+                                {
+                                    transform.position -= new Vector3(fishSpeed * Time.deltaTime, 0, 0);
+                                }
+                                else
+                                {
+                                    Despawn();
+                                }
+                            }
+                
+                            float newY = originalYPosition + Mathf.Sin((Time.time + bobbingOffset) * bobbingFrequency) * bobbingAmplitude;
+                            transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+                        }
+                    }
+                
+                    virtual public void Spawned(float spawnXValue, float newFishSpeed)
+                    {
+                        fishSpeed = newFishSpeed;
+                        originalYPosition = transform.position.y;
+                        SetRandomBobbing();
+                
+                        transform.localScale = transform.localScale * Random.Range(0.7f, 1.1f);
+                
+                        if (spawnXValue == 10f) 
+                        {
+                            isMovingRight = false;
+                            spriteRenderer.flipX = false;
+                            targetXValue = -10f;
+                        }
+                        else
+                        {
+                            isMovingRight = true;
+                            spriteRenderer.flipX = true;
+                            targetXValue = 10f;
+                        }
+                        spriteRenderer.sortingOrder = Random.Range(1, 3);
+                        StartMoving();
+                    }
+                
+                    private void StartMoving()
+                    {
+                        isMoving = true;
+                    }
+                
+                    public void Caught()
+                    {
+                        StopMoving();
+                    }
+                    public void StopMoving()
+                    {
+                        isMoving = false;
+                    }
+                
+                    public void Despawn()
+                    {
+                        Debug.Log("Fish despawned after reaching target.");
+                        Destroy(gameObject);
+                    }
+                
+                    private void SetRandomBobbing()
+                    {
+                        bobbingAmplitude = Random.Range(0.2f, 0.4f);
+                        bobbingFrequency = Random.Range(0.7f, 3.3f);
+                        bobbingOffset = Random.Range(0f, Mathf.PI * 2);
+                    }
+                
+                }
+                
+                </code></pre>
+            </div>
+
+            <h3>Fish Spawning Code</h3>
+            <p>The fish spwaning script handles the spawning of fish from the given prefabs, and is what decides what is spawned. It references the minigame's
+                current level, and randomizes spawn ojbects based on that.
+            </p>
+            <div class="code-box">
+                <pre><code class="language-csharp">
+                // Fish spawning code
+                using System.Collections;
+                using System.Collections.Generic;
+                using Unity.Collections;
+                using Unity.VisualScripting;
+                using UnityEngine;
+
+                public class FishSpawnHandler : MonoBehaviour
+                {
+
+                    [SerializeField] private GameObject[] fishPrefabs;
+                    [SerializeField] private GameObject[] obstaclePrefabs;
+                    [SerializeField] private GameObject[] shorsePrefabs;
+                    [SerializeField] private float shorseSpawnChance;
+                    [SerializeField] private float obstacleSpawnChance;
+                    [SerializeField] private float spawnRateMin;
+                    [SerializeField] private float spawnRateMax;
+                    [SerializeField] private float fishSpeedMin;
+                    [SerializeField] private float fishSpeedMax;
+
+                    [SerializeField] private int minigameLevel;
+
+                    private float[] spawnSide = new float[2] { -10f, 10f };
+                    private float spawnXValue;
+                    private float spawnYValue;
+
+                    private bool winCondition = false;
+                    private bool shorseSpawned = false;
+
+                    // Start is called before the first frame update
+                    void Start()
+                    {
+                        StartCoroutine(SpawnFish());
+                        minigameLevel = MinigameLevelManager.Instance.FishLevelIndex;
+                    }
+
+                    // Update is called once per frame
+                    void Update()
+                    {
+                        
+                    }
+
+                    private IEnumerator SpawnFish()
+                    {
+                        while (!winCondition)
+                        {
+                            float spawnDelay = Random.Range(spawnRateMin, spawnRateMax);
+                            yield return new WaitForSeconds(spawnDelay);
+
+                            spawnXValue = spawnSide[Random.Range(0, 2)];
+                            spawnYValue = Random.Range(-4.25f, 1.9f);
+
+                            Vector3 randomSpawnPosition = new Vector3(spawnXValue, spawnYValue, 0);
+
+
+                            if (minigameLevel < 4 && (Random.Range(0f, 100f) < shorseSpawnChance && !shorseSpawned))
+                            {
+                                Debug.Log("Shorse spawned.");
+                                shorseSpawned = true;
+                                GameObject spawnedShorse = Instantiate(shorsePrefabs[minigameLevel-1], randomSpawnPosition, Quaternion.identity);
+                                spawnedShorse.GetComponent<FishMovementHandler>().Spawned(spawnXValue, Random.Range(fishSpeedMin*2.5f, fishSpeedMax*3.5f));
+                            }
+                            else if (Random.Range(0f, 100f) < obstacleSpawnChance * minigameLevel / 2f && minigameLevel > 1)
+                            {
+                                Debug.Log("Obstacle spawned");
+                                GameObject spawnedObstacle = Instantiate(obstaclePrefabs[Random.Range(0, obstaclePrefabs.Length)], randomSpawnPosition, Quaternion.identity);
+                                spawnedObstacle.GetComponent<FishMovementHandler>().Spawned(spawnXValue, Random.Range(fishSpeedMin, fishSpeedMax));
+                            }
+                            else if (spawnXValue == 10f)
+                            {
+                                Debug.Log("Fish spawned on right.");
+                                GameObject spawnedFish = Instantiate(fishPrefabs[Random.Range(0,fishPrefabs.Length)], randomSpawnPosition, Quaternion.identity);
+                                spawnedFish.GetComponent<FishMovementHandler>().Spawned(spawnXValue, Random.Range(fishSpeedMin, fishSpeedMax));
+                            }
+                            else
+                            {
+                                Debug.Log("Fish spawned on left.");
+                                GameObject spawnedFish = Instantiate(fishPrefabs[Random.Range(0, fishPrefabs.Length)], randomSpawnPosition, Quaternion.identity);
+                                spawnedFish.GetComponent<FishMovementHandler>().Spawned(spawnXValue, Random.Range(fishSpeedMin, fishSpeedMax));
+                            }
+
+                        }
+                    }
+
+                }
+                
+                </code></pre>
+            </div>
+
+            <h3>Fish Base Class Code</h3>
+            <p>This base class for fish, as well as obstacles in the minigame is inherited by multiple other scripts to define unique characteristics
+                for objects. These would include obstacles, which "break" the fishing line and give you a cooldown before you can continue fishing, 
+                as well as a Crab class which eliminates the bobbing effect and spawns the crabs at the bottom of the sea each time.
+            </p>
+            <div class="code-box">
+                <pre><code class="language-csharp">
+                // Fish base class code
+                using System.Collections;
+                using System.Collections.Generic;
+                using UnityEngine;
+                
+                public class Fish : MonoBehaviour, ICatchable
+                {
+                
+                    protected bool _isRodReset = false;
+                    [SerializeField] protected FoodTypeSO foodSO;
+                
+                    private void OnEnable()
+                    {
+                        RodMovementHandler.Instance.OnRodReset += ToggleResetOn;
+                        RodMovementHandler.Instance.OnRodEnable += ToggleResetOff;
+                    }
+                
+                    private void OnDisable()
+                    {
+                        RodMovementHandler.Instance.OnRodReset -= ToggleResetOn;
+                        RodMovementHandler.Instance.OnRodEnable -= ToggleResetOff;
+                    }
+                
+                    virtual protected void OnTriggerEnter2D(Collider2D collision)
+                    {
+                        if (collision.name == "fishing_rod" && !_isRodReset)
+                        {
+                            Catch();    
+                
+                        }
+                    }
+                
+                    // Start is called before the first frame update
+                    void Start()
+                    {
+                
+                    }
+                
+                    // Update is called once per frame
+                    void Update()
+                    {
+                        
+                    }
+                
+                    virtual public void Catch()
+                    {
+                        Debug.Log("Fish caught.");
+                        MinigameScore.Instance.AddScore();
+                        if (FoodInventoryManager.Instance != null)
+                        {
+                            FoodInventoryManager.Instance.AddFood(foodSO, 1);
+                        }
+                
+                        if (SFXManager.instance != null)
+                        {
+                            SFXManager.instance.sfxPlayer.Play();
+                        }
+                        Destroy(gameObject);
+                    }
+                
+                    private void ToggleResetOn()
+                    {
+                        _isRodReset = true;
+                        Debug.Log("Log reset set to: " + _isRodReset);
+                    }
+                
+                    private void ToggleResetOff()
+                    {
+                        _isRodReset = false;
+                        Debug.Log("Log reset set to: " + _isRodReset);
+                    }
+                
+                }
+                
+                </code></pre>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Programming Section (Music minigame) -->
+    <section id="music-programming" class="music-programming">
+        <div class="container">
+            <h2>Programming: Music Minigame</h2>
+            <p>The music minigame, similarly to the fishing minigame is a minigame to obtain a special horse in the game. This is done by notes moving into
+                the middle of the map, which is the "gong." The goal is to click on the notes before they hit the middle deadzone. By collecting a certain number
+                of points, you agre granted the special horse. There's also a lives mechanic where you can fail the minigame if you run out of lives.
+            </p>
+            <div class="video-grid">
+                <div class="video-item">
+                    <iframe 
+                        width="600" 
+                        height="375" 
+                        src="https://www.youtube.com/embed/YzSTD0xg_gs" 
+                        title="Music Minigame Video" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                    <h3>Music Minigame</h3>
+                </div>
+            </div>
+            
+            
+            <h3>Note Movement Code</h3>
+            <p>Relatively simple script which generates spawn points around the map, then spawns the notes which then move towards the center.</p>
+            <div class="code-box">
+                <pre><code class="language-csharp">
+                // Note movement code
+                using System.Collections;
+                using System.Collections.Generic;
+                using UnityEngine;
+
+                public class NoteSpawner : MonoBehaviour
+                {
+
+                    [SerializeField] private GameObject notePrefab;
+                    [SerializeField] private Sprite[] noteVariations;
+                    [SerializeField] private Sprite[] badNoteVariations;
+                    [SerializeField] private Sprite[] colourVariations;
+                    [SerializeField] private float badNoteSpawnChance;
+                    [SerializeField] private float spawnRateMin;
+                    [SerializeField] private float spawnRateMax;
+                    [SerializeField] private int numberOfSpawnPoints;
+                    [SerializeField] private float radius;
+
+                    [SerializeField] private int minigameLevel;
+
+                    private List<Vector2> spawnPoints = new List<Vector2>();
+                    private bool winCondition = false;
+
+                    // Start is called before the first frame update
+                    void Start()
+                    {
+                        GenerateSpawnPoints();
+                        StartCoroutine(SpawnNotes());
+                        minigameLevel = MinigameLevelManager.Instance.MusicLevelIndex;
+                    }
+
+                    // Update is called once per frame
+                    void Update()
+                    {
+                        
+                    }
+
+                    private void GenerateSpawnPoints()
+                    {
+                        float angleStep = 360f / numberOfSpawnPoints;
+                        for (int i = 0; i < numberOfSpawnPoints; i++)
+                        {
+                            float angle = i * angleStep * Mathf.Deg2Rad;
+                            Vector2 spawnPoint = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+                            spawnPoints.Add(spawnPoint);
+                        }
+                    }
+
+                    private IEnumerator SpawnNotes()
+                    {
+                        while (!winCondition)
+                        {
+                            SpawnNote();
+                            yield return new WaitForSeconds(Random.Range(spawnRateMin, spawnRateMax));
+                        }
+                    }
+
+                    private void SpawnNote()
+                    {
+                        int randomIndex = Random.Range(0, spawnPoints.Count);
+                        Vector2 spawnPosition = spawnPoints[randomIndex];
+                        GameObject newNote = Instantiate(notePrefab, spawnPosition, Quaternion.identity);
+                        newNote.name = "Note";
+                        newNote.GetComponent<NoteRandomizer>().SetNoteSprites(noteVariations[Random.Range(0, noteVariations.Length)], colourVariations[Random.Range(0, colourVariations.Length)]);
+                    }
+
+                }
+
+                </code></pre>
+            </div>
+
+        </div>
+    </section>
+
+        <!-- Programming Section (Horse feeding) -->
+        <section id="feeding-programming" class="feeding-programming">
+            <div class="container">
+                <h2>Programming: Food Inventory and Feeding Mechanic</h2>
+                <p>Another key part of the game is the collecting of food for the horses that you have, as well as their feeding. The key here was to
+                    make the system flexible, in a way that allows new foods for new horses down the line to be added with ease. This turned out to be 
+                    a great use for a Dictionary, as it uses key/value pairs and are easy to use for a vast range of different food items.
+                </p>
+                <h3>Food Inventory Manager Code</h3>
+                <p>The script below is what handles keeping track of the amount of food you have of each item, using the Dictionary. In the grand scheme
+                    of things, it is a simple, yet also effective solution.
+                </p>
+                <div class="code-box">
+                    <pre><code class="language-csharp">
+                    // Food Inventory Manager Code here
+                    using System.Collections;
+                    using System.Collections.Generic;
+                    using UnityEngine;
+                    using UnityEngine.Events;
+                    
+                    public class FoodInventoryManager : MonoBehaviour
+                    {
+                        public static FoodInventoryManager Instance { get; private set; }
+                    
+                        [SerializeField] private int foodHappinessModifier = 1;
+                    
+                        public UnityEvent OnFoodInventoryChanged = new UnityEvent();
+                    
+                        private Dictionary<FoodTypeSO, int> foodInventory = new Dictionary<FoodTypeSO, int>();
+                    
+                        private void Awake()
+                        {
+                            if (Instance != null && Instance != this)
+                            {
+                                Destroy(this);
+                                return;
+                            }
+                    
+                            Instance = this;
+                        }
+                        public void AddFood(FoodTypeSO foodType, int amount)
+                        {
+                            if (!foodInventory.ContainsKey(foodType))
+                            {
+                                foodInventory[foodType] = 0;
+                            }
+                            foodInventory[foodType] += amount;
+                            UpdateFoodInventoryStats();
+                        }
+                        public void RemoveFood(FoodTypeSO foodType, int amount)
+                        {
+                            if (foodInventory.ContainsKey(foodType))
+                            {
+                                if (foodInventory[foodType] > 0)
+                                {
+                                    foodInventory[foodType] = Mathf.Max(0, foodInventory[foodType] - amount);
+                                    StableHappinessManager.Instance.IncreaseHappiness(foodHappinessModifier);
+                                    UpdateFoodInventoryStats();
+                                }
+                    
+                            }
+                        }
+                    
+                        private void UpdateFoodInventoryStats()
+                        {
+                            OnFoodInventoryChanged.Invoke();
+                        }
+                    
+                        public int GetFoodAmount(FoodTypeSO foodType)
+                        {
+                            return foodInventory.ContainsKey(foodType) ? foodInventory[foodType] : 0;
+                        }
+                    
+                    }
+                    
+                    </code></pre>
+                </div>
+    
+                <h3>Slot Data Code</h3>
+                <p>What was not simple, however, was due to the unique way of inventory management in the stables where the horses are stored, there was
+                    no data on what horse was in which slot, nor their food preferences. This created a unique challenge, where I had to essentially reverse
+                    engineer the slot system to find the data I needed, and save it for other scripts to then easily reference. This took a lot of hunting and
+                    debugging. And while perhaps not the most elegant solution, it's a solution that works and gave me a lot of skills in reading other peoples'
+                    codes and working with them.
+                </p>
+                <div class="code-box">
+                    <pre><code class="language-csharp">
+                    // Slot data code
+                    using System.Collections;
+                    using System.Collections.Generic;
+                    using TMPro;
+                    using Unity.VisualScripting;
+                    using UnityEngine;
+                    using UnityEngine.Rendering;
+                    using UnityEngine.SceneManagement;
+                    using UnityEngine.UI;
+                    using UnityEngine.UIElements;
+                    
+                    public class SlotData : MonoBehaviour
+                    {
+                    
+                        [SerializeField] private ItemDatabaseObject horseDatabase;
+                        [SerializeField] private InventoryObject stablesInventory;
+                    
+                        public  ItemObject[] stableSlotItems = new ItemObject[16];
+                    
+                        private UnityEngine.UI.Image[] foodImageObjects = new UnityEngine.UI.Image[16];
+                        private TextMeshProUGUI[] foodNumberObjects = new TextMeshProUGUI[16];
+                        private GameObject[] foodDisplayObjects = new GameObject[16];
+                        private HorseAnimationHandler[] horseAnimationHandlers = new HorseAnimationHandler[16];
+                        private HorseSFX[] horseSFXplayers = new HorseSFX[16];
+                        private ItemObject tempSlotData;
+                        public void UpdateSlotData()
+                        {
+                    
+                            for (int i = 0; i < stableSlotItems.Length; i++)
+                            {
+                                
+                                if (stablesInventory.Container.Items[i].item.Id == -1)
+                                {
+                                    stableSlotItems[i] = null;
+                                }
+                                else
+                                {
+                                    stableSlotItems[i] = horseDatabase.Items[stablesInventory.Container.Items[i].item.Id];
+                                }
+                            }
+                    
+                            UpdateIcons();
+                    
+                        }
+                        public ItemObject GetSlotData(int slotId)
+                        {
+                            return stableSlotItems[slotId];
+                        }
+                    
+                        private void OnEnable()
+                        {
+                            //Debug.Log("Updated slot data on scene change.");
+                            if (SceneManager.GetActiveScene().name == "Stables")
+                            {
+                                SetSlotObjects();
+                                UpdateSlotData(); 
+                            }
+                    
+                            if (FoodInventoryManager.Instance != null)
+                            {
+                                FoodInventoryManager.Instance.OnFoodInventoryChanged.AddListener(UpdateIcons);
+                            }
+                    
+                        }
+                    
+                        private void OnDisable()
+                        {
+                            if (FoodInventoryManager.Instance != null)
+                            {
+                                FoodInventoryManager.Instance.OnFoodInventoryChanged.RemoveListener(UpdateIcons);
+                            }
+                        }
+                    
+                        private void SetSlotObjects()
+                        {
+                    
+                            for (int i = 0; i < transform.childCount; i++)
+                            {
+                                horseSFXplayers[i] = transform.GetChild(i).GetComponentInChildren<HorseSFX>();
+                                horseAnimationHandlers[i] = transform.GetChild(i).Find("ItemDisplay").gameObject.GetComponentInChildren<HorseAnimationHandler>();
+                                foodDisplayObjects[i] = transform.GetChild(i).Find("FoodDisplay").gameObject;
+                                foodImageObjects[i] = foodDisplayObjects[i].GetComponentInChildren<UnityEngine.UI.Image>();
+                                foodNumberObjects[i] = foodDisplayObjects[i].GetComponentInChildren<TextMeshProUGUI>();
+                            }
+                    
+                        }
+                        public void UpdateIcons()
+                        {
+                    
+                            for (int i = 0; i < foodImageObjects.Length; i++)
+                            {
+                                tempSlotData = GetSlotData(i);
+                    
+                                if (tempSlotData == null) 
+                                {
+                                    horseSFXplayers[i].horseSO = null;
+                                    horseAnimationHandlers[i].Stop();
+                                    foodImageObjects[i].sprite = null;
+                                    foodNumberObjects[i].text = "0";
+                                    foodDisplayObjects[i].GetComponentInChildren<FoodTypeReference>().FoodTypeRef = null;
+                                    foodDisplayObjects[i].SetActive(false);
+                                }
+                                else
+                                {
+                                    horseSFXplayers[i].horseSO = tempSlotData;
+                                    horseSFXplayers[i].audioClips = tempSlotData.data.horseSFXClips;
+                    
+                                    foodDisplayObjects[i].SetActive(true);
+                                    foodDisplayObjects[i].GetComponentInChildren<FoodTypeReference>().FoodTypeRef = tempSlotData.data.horseFoodPreference;
+                                    foodImageObjects[i].sprite = tempSlotData.data.horseFoodPreference.foodSprite;
+                                    if (tempSlotData.data.horseAnimation != null)
+                                    {
+                                        Debug.Log("Horse animation set in stables");
+                                        horseAnimationHandlers[i].horseAnimation = tempSlotData.data.horseAnimation;
+                                        horseAnimationHandlers[i].Play();
+                                    }
+                                    int foodNumberToSet = FoodInventoryManager.Instance.GetFoodAmount(tempSlotData.data.horseFoodPreference);
+                                    foodNumberObjects[i].text = foodNumberToSet > 99 ? "99+" : foodNumberToSet.ToString();
+                                }
+                            }
+                    
+                        }
+                    
+                    }
+                    </code></pre>
+                </div>    
+            </div>
+        </section>
+
+    <!-- Testing Section -->
+    <section id="testing" class="testing">
+        <div class="container">
+            <h2>Testing</h2>
+            <p>As for the testing part of the project, albeit I didn't have as much time as I'd have hoped for this, I was able to achieve my primary goals;
+                to deliver a playable experience which can be enjoyed. And I believe I have succeeded in that. In terms of what I did for the project, I:
+                <br> <br> Created a High Level Test Plan <br> Created Test Plans for testing sessions <br> Created feedback forms for the testing sessions
+                <br> Observed and took notes of players playing the game <br> Compiled feedback <br> Brought up the mentioned feedback with the team 
+                <br> Suggested changes based on feedback <br> And did iterative testing <br> <br>
+                The amount of feedback that can be extracted from just a couple of playtesters is astonishing. The non-developer perspective 
+                and the feedback from that helped shape the game into a more user-friendly and enjoyable experience overall.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Flavio Florovits. All rights reserved.</p>
+    </footer>
+
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.js"></script>
+</body>
+</html>
